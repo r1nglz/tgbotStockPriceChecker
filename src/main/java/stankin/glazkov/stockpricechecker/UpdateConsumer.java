@@ -165,18 +165,3 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         telegramClient.execute(message);
     }
 }
-
-@Component
-@EnableScheduling
-class DataUpdater {
-
-    @Scheduled(fixedRate = 300000)
-    public void refreshData() {
-        try {
-            PriceParser.getRubToOthers();
-            PriceParser.getStockPrices();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-}
