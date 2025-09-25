@@ -68,10 +68,11 @@ class Currency {
     }
 
     public static Currency findCurrency(List<Currency> currencies, String query) {
-
+        Currency bestMatch = null;
+        int bestScore = -1;
 
         for (Currency c : currencies) {
-            if (c.charCode.toUpperCase().equalsIgnoreCase(query)) {
+            if (query.length() == 3 && c.charCode.equalsIgnoreCase(query)) {
                 return c;
             }
 
@@ -87,9 +88,13 @@ class Currency {
                     FuzzySearch.ratio(c.charCode.toLowerCase(), query),
                     getMaxFuzzyScore(c.name, query)
             );
+            if (fuzzyScore > bestScore) {
+                bestScore = fuzzyScore;
+                bestMatch = c;
+            }
 
-            if (fuzzyScore >= 65) {
-                return c;
+            if (bestScore >= 70) {
+                return bestMatch;
             }
         }
 
@@ -115,7 +120,7 @@ public class PriceParser {
     static ArrayList<Currency> listOfValues = new ArrayList<>();
     static ArrayList<StockCurrency> listOfStocks = new ArrayList<>();
 
-    static void getRubToOthers() throws IOException {
+    static void getRubToOthers() {
         try {
             Document document = Jsoup.connect("https://www.cbr.ru/currency_base/daily/").get();
             Elements rows = document.select("table tr");
@@ -148,8 +153,9 @@ public class PriceParser {
             OkHttpClient client = new OkHttpClient();
             ObjectMapper mapper = new ObjectMapper();
             Request request = new Request.Builder().url(url).build();
-            Response response = null;
+            Response response;
             response = client.newCall(request).execute();
+            assert response.body() != null;
             JsonNode root = mapper.readTree(response.body().string());
             JsonNode securities = root.path("securities");
             JsonNode columns = securities.get("columns");

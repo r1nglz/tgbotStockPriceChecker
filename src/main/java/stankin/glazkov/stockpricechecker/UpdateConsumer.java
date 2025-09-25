@@ -1,5 +1,8 @@
 package stankin.glazkov.stockpricechecker;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
@@ -19,7 +22,6 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
@@ -51,11 +53,6 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         if (update.hasMessage()) {
             String messageText = update.getMessage().getText();
             chatId = update.getMessage().getChatId();
-            try {
-                PriceParser.getRubToOthers();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
             if (messageText.equals("/start")) {
                 try {
                     sendMainMenu(chatId);
@@ -63,12 +60,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                     throw new RuntimeException(e);
                 }
             } else {
-                try {
-                    PriceParser.getRubToOthers();
-                    PriceParser.getStockPrices();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+
 
                 Currency cur = Currency.findCurrency(PriceParser.listOfValues, messageText);
                 StockCurrency curr = StockCurrency.FindStockCurrency(PriceParser.listOfStocks, messageText);
@@ -96,7 +88,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
                 } else {
                     SendMessage message = SendMessage.builder()
-                            .text("Неизвестная команда")
+                            .text("Я не знаю такой валюты/компании")
                             .chatId(chatId)
                             .build();
                     try {
@@ -119,13 +111,23 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    private void handleCallbackQuery(CallbackQuery callbackQuery) throws IOException {
+    private void handleCallbackQuery(@NotNull CallbackQuery callbackQuery) throws IOException {
         var data = callbackQuery.getData();
         String chatId = callbackQuery.getMessage().getChatId().toString();
         var user = callbackQuery.getFrom();
         switch (data) {
             case "help" -> sendHelp(chatId);
-            default -> new SendMessage(chatId, "Неизвестная команда");
+            default -> {
+                SendMessage msg = SendMessage.builder()
+                        .chatId(chatId)
+                        .text("Неизвестная команда")
+                        .build();
+                try {
+                    telegramClient.execute(msg);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -161,5 +163,20 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup(keyboardRows);
         message.setReplyMarkup(markup);
         telegramClient.execute(message);
+    }
+}
+
+@Component
+@EnableScheduling
+class DataUpdater {
+
+    @Scheduled(fixedRate = 300000)
+    public void refreshData() {
+        try {
+            PriceParser.getRubToOthers();
+            PriceParser.getStockPrices();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
