@@ -2,12 +2,9 @@ package stankin.glazkov.stockpricechecker;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.tools.javac.Main;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,11 +13,6 @@ import org.springframework.stereotype.Component;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.security.Security;
 import java.util.*;
 
 class StockCurrency {
@@ -119,13 +111,6 @@ class Currency {
 
 @Component
 public class PriceParser {
-    public static void main(String[] args) {
-        try {
-            getRubToOthers();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     static ArrayList<Currency> listOfValues = new ArrayList<>();
     static ArrayList<StockCurrency> listOfStocks = new ArrayList<>();
@@ -140,7 +125,6 @@ public class PriceParser {
                 Elements cols = row.select("td");
                 Currency cur = new Currency(cols.get(0).text(), cols.get(1).text(), cols.get(2).text(), cols.get(3).text().split(" "), cols.get(4).text(), cols.get(3).text());
                 listOfValues.add(cur);
-                System.out.println(listOfValues.size());
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -22,7 +22,8 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
     private final TelegramClient telegramClient;
 
     public UpdateConsumer() {
-        this.telegramClient = new OkHttpTelegramClient("8426320186:AAESpPcbOKAR7DMjk6rJRPMmZ5fwj0a3vzM");
+        String token = System.getenv("TELEGRAM_TOKEN");
+        this.telegramClient = new OkHttpTelegramClient(token);
     }
 
     @Override
@@ -54,7 +55,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                 StockCurrency curr = StockCurrency.FindStockCurrency(PriceParser.listOfStocks, messageText);
                 if (cur != null) {
                     SendMessage message = SendMessage.builder()
-                            .text(cur.howMuch + " Акция " + cur.charCode.toUpperCase() + " (" + cur.fullname + ") = " + cur.price + " RUB")
+                            .text(cur.howMuch + " " + cur.charCode.toUpperCase() + " (" + cur.fullname + ") = " + cur.price + " RUB")
                             .chatId(chatId)
                             .build();
                     try {
@@ -64,7 +65,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                     }
                 } else if (curr != null) {
                     SendMessage message = SendMessage.builder()
-                            .text(curr.LOTSIZE + " " + curr.SHORTNAME + " (" + curr.SECNAME + ") = " + curr.PREVPRICE + " RUB")
+                            .text(curr.LOTSIZE + " Акция " + curr.SHORTNAME + " (" + curr.SECNAME + ") = " + curr.PREVPRICE + " RUB")
                             .chatId(chatId)
                             .build();
                     try {
