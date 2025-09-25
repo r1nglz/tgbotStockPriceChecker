@@ -118,12 +118,12 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         switch (data) {
             case "help" -> sendHelp(chatId);
             default -> {
-                SendMessage msg = SendMessage.builder()
+                SendMessage message = SendMessage.builder()
                         .chatId(chatId)
                         .text("Неизвестная команда")
                         .build();
                 try {
-                    telegramClient.execute(msg);
+                    telegramClient.execute(message);
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
