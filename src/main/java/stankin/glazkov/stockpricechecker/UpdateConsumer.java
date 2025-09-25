@@ -84,8 +84,8 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                     }
 
 
-                } else if (messageText.matches("\\d+\\s+[a-zA-Z]{3}\\s+в\\s+[a-zA-Z]{3}")) {
-                    String[] parts = messageText.split("\\s+");
+                } else if (messageText.matches("[1-9][0-9]* [a-zA-Z]{3} [В|в] [a-zA-Z]{3}")) {
+                    String[] parts = messageText.split(" ");
                     double amount = Double.parseDouble(parts[0]);
                     String from = parts[1].toUpperCase();
                     String to = parts[3].toUpperCase();
@@ -111,7 +111,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
                 } else {
                     SendMessage message = SendMessage.builder()
-                            .text("Я не знаю такой валюты/компании")
+                            .text("Я не понимаю вас")
                             .chatId(chatId)
                             .build();
                     try {
