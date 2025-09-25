@@ -45,19 +45,48 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
             } else {
                 try {
                     PriceParser.getRubToOthers();
+                    PriceParser.getStockPrices();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+
                 Currency cur = Currency.findCurrency(PriceParser.listOfValues, messageText);
-                SendMessage message = SendMessage.builder()
-                        .text(cur.howMuch + " " + cur.charCode.toUpperCase() + " (" + cur.fullname + ") = " + cur.price + " RUB")
-                        .chatId(chatId)
-                        .build();
-                try {
-                    telegramClient.execute(message);
-                } catch (TelegramApiException e) {
-                    throw new RuntimeException(e);
+                StockCurrency curr = StockCurrency.FindStockCurrency(PriceParser.listOfStocks, messageText);
+                if (cur != null) {
+                    SendMessage message = SendMessage.builder()
+                            .text(cur.howMuch + " Акция " + cur.charCode.toUpperCase() + " (" + cur.fullname + ") = " + cur.price + " RUB")
+                            .chatId(chatId)
+                            .build();
+                    try {
+                        telegramClient.execute(message);
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (curr != null) {
+                    SendMessage message = SendMessage.builder()
+                            .text(curr.LOTSIZE + " " + curr.SHORTNAME + " (" + curr.SECNAME + ") = " + curr.PREVPRICE + " RUB")
+                            .chatId(chatId)
+                            .build();
+                    try {
+                        telegramClient.execute(message);
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
+
+
                 }
+                else{
+                    SendMessage message = SendMessage.builder()
+                            .text("Неизвестная команда")
+                            .chatId(chatId)
+                            .build();
+                    try {
+                        telegramClient.execute(message);
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
             }
 
 
@@ -83,7 +112,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
     private void sendHelp(String chatId) {
         String res = "Чтобы пользоваться ботом введите название валюты или её буквенный код (EUR, USD и т.д.).\n\n" +
-                "Также вы можете ввести название компании, цену акции которой вы хотите узнать.\n\n\nДанные о курсах валют берутся с сайта ЦБ РФ\nДанные о курсах акций берутся с сайта Московской Биржи";
+                "Также вы можете ввести название компании, цену акции которой вы хотите узнать.\n\n\nДанные о курсах валют берутся с сайта ЦБ РФ\nДанные о курсах акций берутся с сайта московской Биржи";
         SendMessage message = SendMessage.builder()
                 .text(res)
                 .chatId(chatId)
