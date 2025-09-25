@@ -1,15 +1,23 @@
 package stankin.glazkov.stockpricechecker;
 
+import lombok.Getter;
+import lombok.Setter;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 import java.util.List;
 
+@Setter
+@Getter
 public class StockCurrency {
-    String SECID, PREVPRICE, SHORTNAME, LOTSIZE, SECNAME;
+    private String PREVPRICE;
+    private String SECID;
+    private String SHORTNAME;
+    private String LOTSIZE;
+    private String SECNAME;
 
     StockCurrency(String secid, String prevprice, String shortname, String lotsize, String secname) {
-        this.PREVPRICE = prevprice;
         this.LOTSIZE = lotsize;
+        this.PREVPRICE = prevprice;
         this.SECID = secid;
         this.SECNAME = secname;
         this.SHORTNAME = shortname;

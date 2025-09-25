@@ -66,7 +66,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                 StockCurrency curr = StockCurrency.FindStockCurrency(PriceParser.listOfStocks, messageText);
                 if (cur != null) {
                     SendMessage message = SendMessage.builder()
-                            .text(cur.howMuch + " " + cur.charCode.toUpperCase() + " (" + cur.fullname + ") = " + cur.price + " RUB")
+                            .text(cur.getHowMuch() + " " + cur.getCharCode().toUpperCase() + " (" + cur.getFullname() + ") = " + cur.getPrice() + " RUB")
                             .chatId(chatId)
                             .build();
                     try {
@@ -76,7 +76,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                     }
                 } else if (curr != null) {
                     SendMessage message = SendMessage.builder()
-                            .text(curr.LOTSIZE + " Акция " + curr.SHORTNAME + " (" + curr.SECNAME + ") = " + curr.PREVPRICE + " RUB")
+                            .text(curr.getLOTSIZE() + " Акция " + curr.getSHORTNAME() + " (" + curr.getSECNAME() + ") = " + curr.getPREVPRICE() + " RUB")
                             .chatId(chatId)
                             .build();
                     try {
@@ -86,6 +86,31 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                     }
 
 
+                } else if (messageText.matches("\\d+\\s+[a-zA-Z]{3}\\s+в\\s+[a-zA-Z]{3}")) {
+                    String[] parts = messageText.split("\\s+");
+                    double amount = Double.parseDouble(parts[0]);
+                    String from = parts[1].toUpperCase();
+                    String to = parts[3].toUpperCase();
+
+                    try {
+                        double result = ValuteConverter.convertCurrency(from, to, amount);
+                        SendMessage message = SendMessage.builder()
+                                .chatId(chatId)
+                                .text(amount + " " + from + " = " + result + " " + to)
+                                .build();
+                        telegramClient.execute(message);
+                    } catch (Exception e) {
+                        SendMessage message = SendMessage.builder()
+                                .chatId(chatId)
+                                .text("Ошибка при конвертации: " + e.getMessage())
+                                .build();
+                        try {
+                            telegramClient.execute(message);
+                        } catch (TelegramApiException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                    return;
                 } else {
                     SendMessage message = SendMessage.builder()
                             .text("Я не знаю такой валюты/компании")

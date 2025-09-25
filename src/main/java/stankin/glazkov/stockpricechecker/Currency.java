@@ -1,9 +1,12 @@
 package stankin.glazkov.stockpricechecker;
 
+import lombok.Getter;
+import lombok.Setter;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 import java.util.List;
-
+@Getter
+@Setter
 public class Currency {
     String numCode, charCode, howMuch, price, fullname;
     String[] name;
@@ -56,7 +59,9 @@ public class Currency {
         for (String name : names) {
 
             int score = FuzzySearch.ratio(name.toLowerCase(), query);
-            if (score > max) max = score;
+            if (score > max) {
+                max = score;
+            }
 
         }
         return max;
