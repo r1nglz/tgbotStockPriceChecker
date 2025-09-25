@@ -9,6 +9,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
@@ -19,11 +23,26 @@ import java.util.Map;
 
 @Component
 public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
+
     private final TelegramClient telegramClient;
+
+    private void registerBotCommands() {
+        List<BotCommand> commandList = new ArrayList<>();
+        commandList.add(new BotCommand("/start", "Запуск бота"));
+
+        try {
+            telegramClient.execute(
+                    new SetMyCommands(commandList, new BotCommandScopeDefault(), null)
+            );
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public UpdateConsumer() {
         String token = System.getenv("TELEGRAM_TOKEN");
         this.telegramClient = new OkHttpTelegramClient(token);
+        registerBotCommands();
     }
 
     @Override
@@ -75,8 +94,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                     }
 
 
-                }
-                else{
+                } else {
                     SendMessage message = SendMessage.builder()
                             .text("Неизвестная команда")
                             .chatId(chatId)
