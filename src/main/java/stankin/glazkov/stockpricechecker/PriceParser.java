@@ -71,7 +71,7 @@ class Currency {
 
 
         for (Currency c : currencies) {
-            if (c.charCode.equalsIgnoreCase(query)) {
+            if (c.charCode.toUpperCase().equalsIgnoreCase(query)) {
                 return c;
             }
 
