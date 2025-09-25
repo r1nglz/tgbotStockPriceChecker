@@ -42,7 +42,7 @@ public class StockCurrency {
                     FuzzySearch.ratio(s.SECNAME.toLowerCase(), query.toLowerCase())
             );
 
-            if (fuzzyScore >= 65) {
+            if (fuzzyScore >= 67) {
                 return s;
             }
         }
