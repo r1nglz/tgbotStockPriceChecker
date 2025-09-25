@@ -108,7 +108,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                             throw new RuntimeException(ex);
                         }
                     }
-                    return;
+
                 } else {
                     SendMessage message = SendMessage.builder()
                             .text("Я не знаю такой валюты/компании")
@@ -155,8 +155,9 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
     }
 
     private void sendHelp(String chatId) {
-        String res = "Чтобы пользоваться ботом введите название валюты или её буквенный код (EUR, USD и т.д.).\n\n" +
-                "Также вы можете ввести название компании, цену акции которой вы хотите узнать.\n\n\nДанные о курсах валют берутся с сайта ЦБ РФ\nДанные о курсах акций берутся с сайта московской Биржи";
+        String res = "Чтобы пользоваться ботом введите название валюты или её буквенный код (EUR, USD и т.д.).\n" +
+                "Также вы можете ввести название компании, цену акции которой вы хотите узнать.\n\nДанные о курсах валют берутся с сайта ЦБ РФ\nДанные о курсах акций берутся с сайта московской Биржи" +
+                "\n\nТакже вы можете конвертировать одну валюту в другую, написав сообщение в формате {количество валюты} {символьный код валюты из которой хотите перевести} В {символьный код валюты в которую хотите перевести}. К примеру: 100 USD в RUB";
         SendMessage message = SendMessage.builder()
                 .text(res)
                 .chatId(chatId)
